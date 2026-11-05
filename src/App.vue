@@ -15,11 +15,12 @@ const tasks = ref([])
 import { ref, onMounted } from 'vue';
 
 onMounted(async () => {
+    tasks.value = await tasksService.useFetch();
+});
 
-  const response = await tasksService.useFetch();
-
-  tasks.value = response.data.todos;
-})
+const handleDeleteTask = (taskId) => {
+    tasks.value = tasksService.removeTask(taskId);
+};
 </script>
 
 <template>
@@ -43,7 +44,7 @@ onMounted(async () => {
       <section class="panel">
         <FiltersSection />
 
-        <TaskListSection :tasks="tasks" />
+        <TaskListSection :tasks="tasks" @delete-task="handleDeleteTask" />
 
         <PaginationSection />
       </section>

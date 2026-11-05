@@ -1,4 +1,6 @@
 <script setup>
+const emit = defineEmits(['deleteTask']);
+
 const props = defineProps({
     tasks: {
         type: Array,
@@ -6,10 +8,14 @@ const props = defineProps({
     }
 })
 
+const deleteTask = (taskId) => {
+    emit('deleteTask', taskId);
+}
+
 </script>
 
 <template>
-    <p><span class="status">Ready</span> Showing 10 of 38 tasks</p>
+    <p><span class="status">Ready</span> Showing 10 of {{ tasks.length }} tasks</p>
 
     <table>
         <thead>
@@ -23,7 +29,10 @@ const props = defineProps({
             <tr v-for="task in tasks" :key="task.id">
                 <td>{{ task.todo }}</td>
                 <td><span class="badge" :class="task.completed ? 'success' : 'danger'">{{ task.completed ? 'Completed' : 'Pending' }}</span></td>
-                <td><button class="secondary" type="button">Complete</button> <button class="danger" type="button">Delete</button></td>
+                <td>
+                        <button class="secondary" type="button">Complete</button> 
+                        <button class="danger" type="button" @click="deleteTask(task.id)">Delete</button>
+                </td>
             </tr>
         </tbody>
     </table>
