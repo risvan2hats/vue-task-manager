@@ -21,7 +21,7 @@ const handleFilterChange = () => {
 
 <template>
     <div class="filters">
-        <input type="search" placeholder="Search title or description" v-model="search" @input="handleFilterChange">
+        <input type="search" placeholder="Search task" v-model="search" @input="handleFilterChange">
 
         <select v-model="status" @change="handleFilterChange">
             <option value="all">All statuses</option>
