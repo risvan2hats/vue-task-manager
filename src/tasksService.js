@@ -10,15 +10,21 @@ const tasksService = {
      * Apply search, status, sorting and pagination locally
      */
     async useFetch(filter = {}) {
-        let tasks = getStoredTasks('tasks');
+        let tasks = getStoredData('tasks');
+
+        if (Object.keys(filter).length) {
+            setStoredData('tasks_filters', filter);
+        }
+
+        filter = getStoredData('tasks_filters');
 
         if (!tasks.length) {
             controller = new AbortController();
             const response = await api.get('/todos?limit=0', {
                 signal: controller.signal,
             });
-            setStoredTasks('tasks', response.data.todos);
-            tasks = getStoredTasks('tasks');
+            setStoredData('tasks', response.data.todos);
+            tasks = getStoredData('tasks');
         }
 
         let limit   = filter.limit || 10;
@@ -79,9 +85,9 @@ const tasksService = {
      * Add a new task
      */
     addTask(task) {
-        const tasks = getStoredTasks('tasks');
+        const tasks = getStoredData('tasks');
         tasks.push(task);
-        setStoredTasks('tasks', tasks);
+        setStoredData('tasks', tasks);
 
         return this.useFetch();
     },
@@ -90,9 +96,9 @@ const tasksService = {
      * Remove a task by ID
      */
     removeTask(taskId) {
-        const tasks = getStoredTasks('tasks');
+        const tasks = getStoredData('tasks');
         const updatedTasks = tasks.filter(task => task.id !== taskId);
-        setStoredTasks('tasks', updatedTasks);
+        setStoredData('tasks', updatedTasks);
 
         return this.useFetch();
     },
@@ -101,13 +107,13 @@ const tasksService = {
      * Complete a task by ID
      */
     completeTask(taskId) {
-        const tasks = getStoredTasks('tasks');
+        const tasks = getStoredData('tasks');
         const updatedTasks = tasks.map(task =>
             task.id === taskId
                 ? { ...task, completed: !task.completed }
                 : task
         );
-        setStoredTasks('tasks', updatedTasks);
+        setStoredData('tasks', updatedTasks);
 
         return this.useFetch();
     },
@@ -118,6 +124,7 @@ const tasksService = {
     refreshTasks() {
         controller?.abort();
         localStorage.removeItem('tasks');
+        localStorage.removeItem('tasks_filters');
 
         return this.useFetch();
     },
@@ -126,14 +133,14 @@ const tasksService = {
 /**
  * Get tasks from localStorage
  */
-function getStoredTasks(key) {
+function getStoredData(key) {
     return JSON.parse(localStorage.getItem(key) || '[]');
 }
 
 /**
  * Set tasks in localStorage
  */
-function setStoredTasks(key, tasks) {
+function setStoredData(key, tasks) {
     localStorage.setItem(key, JSON.stringify(tasks));
 }
 
