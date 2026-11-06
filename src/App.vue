@@ -12,12 +12,15 @@ import TaskAddModal from '@/components/TaskAddModal.vue'
 import tasksService from '@/tasksService';
 
 import { ref, onMounted } from 'vue';
+import { Toaster, toast } from 'vue-sonner';
 
 const tasks = ref([])
 const showTaskModal = ref(false)
+const loading = ref(true);
 
 onMounted(async () => {
   tasks.value = await tasksService.useFetch();
+  setTimeout(() => loading.value = false, 2000); 
 });
 
 // Add a new task
@@ -32,11 +35,13 @@ const handleNewTask = async ({ todo, completed }) => {
 // Complete a task
 const handleCompleteTask = async (taskId) => {
   tasks.value = await tasksService.completeTask(taskId);
+  toast.success('Task status updated successfully!');
 };
 
 // Delete a task
 const handleDeleteTask = async (taskId) => {
   tasks.value = await tasksService.removeTask(taskId);
+  toast.success('Task deleted successfully!');
 };
 
 // Refresh tasks
@@ -54,8 +59,9 @@ const handlePagination = async (page) => {
     tasks.value = await tasksService.useFetch({ page });
 };
 </script>
-
 <template>
+  <Toaster position="top-right" />
+
   <div class="app">
     <SideBar />
 
@@ -76,7 +82,7 @@ const handlePagination = async (page) => {
       <section class="panel">
         <FiltersSection @filter-change="handleFilterChange" />
 
-        <TaskListSection :tasks="tasks" @delete-task="handleDeleteTask" @complete-task="handleCompleteTask" />
+        <TaskListSection :tasks="tasks" :loading="loading" @delete-task="handleDeleteTask" @complete-task="handleCompleteTask" />
 
         <PaginationSection :totalPages="tasks.totalPages" :currentPage="tasks.page" @pagination="handlePagination" />
       </section>

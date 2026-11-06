@@ -1,6 +1,8 @@
 
 import api from './api';
 
+let controller = null;
+
 const tasksService = {
 
     /**
@@ -11,7 +13,10 @@ const tasksService = {
         let tasks = getStoredTasks('tasks');
 
         if (!tasks.length) {
-            const response = await api.get('/todos?limit=0');
+            controller = new AbortController();
+            const response = await api.get('/todos?limit=0', {
+                signal: controller.signal,
+            });
             setStoredTasks('tasks', response.data.todos);
             tasks = getStoredTasks('tasks');
         }
@@ -111,6 +116,7 @@ const tasksService = {
      * Refresh tasks, remove cached tasks and fetch new ones
      */
     refreshTasks() {
+        controller?.abort();
         localStorage.removeItem('tasks');
 
         return this.useFetch();
